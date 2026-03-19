@@ -51,10 +51,13 @@ export async function generateRoadmap(
       .join('');
 
     // Parse the JSON response into a structured object.
-    const parsed = parseRoadmapResponse(rawText);
+    const parsed = parseRoadmapResponse(rawText) as SessionRoadmap;
 
     return {
-      ...parsed,
+      session_loop:    parsed.session_loop,
+      main_adjustment: parsed.main_adjustment,
+      abort_cost_cap:  parsed.abort_cost_cap,
+      reentry_anchor:  parsed.reentry_anchor,
       context: {
         build_health:  request.compiler_output.overall_health ?? 0,
         identity_name: request.compiler_output.identity_name ?? 'Unknown',
@@ -64,7 +67,7 @@ export async function generateRoadmap(
       raw_response: rawText,
       generated_at: generatedAt,
       model_used:   MODEL,
-    };
+    } as SessionRoadmap;
 
   } catch (error) {
     console.error('Roadmap generation failed:', error);
