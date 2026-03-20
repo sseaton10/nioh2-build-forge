@@ -1,13 +1,10 @@
-// =============================================================================
-// Character Sheet Screen
-// The player's primary data-entry screen. Every stat the engine needs
-// lives here. Changes update the Zustand store immediately, which
-// invalidates the compiler output so the player knows a re-analysis is needed.
-// =============================================================================
+'use client'
 import React from 'react';
 import { useBuildStore } from '../../store/buildStore';
-import { compileBuild } from '../../compiler';
 import { saveBuild } from '../../persistence';
+import { EquipmentSelector } from '../EquipmentSelector/EquipmentSelector';
+import { ModifierDisplay } from '../ModifierDisplay/ModifierDisplay';
+import { BuildAnalysis } from '../BuildAnalysis/BuildAnalysis';
 
 const STATS = [
   { key: 'strength',     label: 'Strength',     desc: 'Primary — Fists B+ scaling' },
@@ -23,37 +20,17 @@ const STATS = [
 export function CharacterSheet() {
   const {
     activeBuildName, identityKey, characterState,
-    compilerOutput, isCompiling, hasUnsavedChanges,
-    activeBuildId, isSaving,
-    setActiveBuildName, updateStat, setCompilerOutput,
-    setIsCompiling, setView, setActiveBuildId,
-    setIsSaving, setHasUnsavedChanges,
+    compilerOutput, hasUnsavedChanges, activeBuildId,
+    isSaving, setActiveBuildName, updateStat, setView,
+    setActiveBuildId, setIsSaving, setHasUnsavedChanges,
   } = useBuildStore();
 
-  // Run the full compiler pipeline against the current character state.
-  // Sets isCompiling during the async operation so the UI can show a spinner.
-  // When done, stores the output in the store and navigates to analysis.
-  async function handleAnalyze() {
-    setIsCompiling(true);
-    try {
-      const output = await compileBuild(characterState, identityKey);
-      setCompilerOutput(output);
-      setView('build_analysis');
-    } catch (err) {
-      console.error('Compile failed:', err);
-    } finally {
-      setIsCompiling(false);
-    }
-  }
-
-  // Saves the current build to Supabase via the persistence layer.
-  // Uses the optimistic pattern — the UI updates immediately.
   async function handleSave() {
     setIsSaving(true);
     try {
       const { id, error } = await saveBuild({
-        buildId:        activeBuildId,
-        buildName:      activeBuildName,
+        buildId: activeBuildId,
+        buildName: activeBuildName,
         identityKey,
         characterState,
         compilerOutput,
@@ -68,11 +45,11 @@ export function CharacterSheet() {
   }
 
   return (
-    <div style={{ padding: '24px', maxWidth: '600px', margin: '0 auto' }}>
+    <div style={{ padding: '24px', maxWidth: '640px', margin: '0 auto' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
         <button onClick={() => setView('build_list')}
-          style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: '20px' }}>
+          style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: '22px' }}>
           ←
         </button>
         <input
@@ -86,8 +63,8 @@ export function CharacterSheet() {
         )}
       </div>
 
-      {/* Stat inputs */}
-      <div style={{ background: '#1f2937', borderRadius: '10px', padding: '20px', marginBottom: '16px' }}>
+      {/* Stats */}
+      <div style={{ background: '#1f2937', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
         <h2 style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9ca3af', margin: '0 0 16px' }}>
           Character Stats
         </h2>
@@ -107,15 +84,13 @@ export function CharacterSheet() {
                   <span style={{ fontSize: '11px', color: '#6b7280' }}>{desc}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button
-                    onClick={() => updateStat(key, Math.max(1, value - 1))}
-                    style={{ width: '28px', height: '28px', background: '#374151', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontSize: '16px' }}>
+                  <button onClick={() => updateStat(key, Math.max(1, value - 1))}
+                    style={{ width: '28px', height: '28px', background: '#374151', border: 'none', borderRadius: '6px', color: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 700 }}>
                     −
                   </button>
                   <span style={{ width: '28px', textAlign: 'center', fontWeight: 700, fontSize: '16px' }}>{value}</span>
-                  <button
-                    onClick={() => updateStat(key, Math.min(99, value + 1))}
-                    style={{ width: '28px', height: '28px', background: '#374151', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontSize: '16px' }}>
+                  <button onClick={() => updateStat(key, Math.min(99, value + 1))}
+                    style={{ width: '28px', height: '28px', background: '#374151', border: 'none', borderRadius: '6px', color: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 700 }}>
                     +
                   </button>
                 </div>
@@ -125,25 +100,20 @@ export function CharacterSheet() {
         </div>
       </div>
 
-      {/* Action buttons */}
-      <div style={{ display: 'flex', gap: '10px' }}>
-        <button onClick={handleSave} disabled={isSaving || !hasUnsavedChanges}
-          style={{ flex: 1, padding: '12px', background: '#374151', border: 'none', borderRadius: '8px', color: hasUnsavedChanges ? '#fff' : '#6b7280', fontWeight: 600, cursor: hasUnsavedChanges ? 'pointer' : 'default' }}>
-          {isSaving ? 'Saving...' : 'Save Build'}
-        </button>
-        <button onClick={handleAnalyze} disabled={isCompiling}
-          style={{ flex: 2, padding: '12px', background: '#f59e0b', border: 'none', borderRadius: '8px', color: '#000', fontWeight: 700, cursor: 'pointer', fontSize: '15px' }}>
-          {isCompiling ? 'Analyzing...' : 'Analyze Build →'}
-        </button>
-      </div>
+      {/* Equipment Selectors */}
+      <EquipmentSelector />
 
-      {/* Quick re-entry if compiler output already exists */}
-      {compilerOutput && (
-        <button onClick={() => setView('build_analysis')}
-          style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'transparent', border: '1px solid #374151', borderRadius: '8px', color: '#9ca3af', cursor: 'pointer' }}>
-          View last analysis ({compilerOutput.overall_health}/100)
-        </button>
-      )}
+      {/* Active Modifier Display */}
+      <ModifierDisplay />
+
+      {/* Save button */}
+      <button onClick={handleSave} disabled={isSaving || !hasUnsavedChanges}
+        style={{ width: '100%', padding: '11px', background: '#374151', border: 'none', borderRadius: '10px', color: hasUnsavedChanges ? '#fff' : '#6b7280', fontWeight: 600, cursor: hasUnsavedChanges ? 'pointer' : 'default', marginBottom: '12px' }}>
+        {isSaving ? 'Saving...' : 'Save Build'}
+      </button>
+
+      {/* Build Analysis — inline on this screen */}
+      <BuildAnalysis />
     </div>
   );
 }
