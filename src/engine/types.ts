@@ -37,10 +37,11 @@ export interface CharacterState {
 
   // Armor slots — UUIDs for each equipped armor piece
   equippedArmor: {
-    head:  string | null;
-    chest: string | null;
-    hands: string | null;
-    legs:  string | null;
+    helmet: string | null;
+    torso:  string | null;
+    gloves: string | null;
+    waist:  string | null;
+    boots:  string | null;
   };
 
   // Yasakani Magatama — if true, all set bonus thresholds reduce by 1

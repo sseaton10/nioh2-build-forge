@@ -125,7 +125,7 @@ const defaultCharacterState: CharacterState = {
   equippedSecondaryId:      null,
   equippedGuardianSpiritId: null,
   equippedSoulCoreIds:      [],
-  equippedArmor: { head: null, chest: null, hands: null, legs: null },
+  equippedArmor: { helmet: null, torso: null, gloves: null, waist: null, boots: null },
   hasYasakaniMagatama: false,
   isInYokaiShift:      false,
   activeEnemyStatuses: [],

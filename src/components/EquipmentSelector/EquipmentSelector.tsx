@@ -21,31 +21,34 @@ export function EquipmentSelector() {
   const [odachi,  setOdachi]  = useState<Item[]>([]);
   const [spirits, setSpirits] = useState<Item[]>([]);
   const [cores,   setCores]   = useState<Item[]>([]);
-  const [head,    setHead]    = useState<Item[]>([]);
-  const [chest,   setChest]   = useState<Item[]>([]);
-  const [hands,   setHands]   = useState<Item[]>([]);
-  const [legs,    setLegs]    = useState<Item[]>([]);
+  const [helmet, setHelmet] = useState<Item[]>([]);
+  const [torso,  setTorso]  = useState<Item[]>([]);
+  const [gloves, setGloves] = useState<Item[]>([]);
+  const [waist,  setWaist]  = useState<Item[]>([]);
+  const [boots,  setBoots]  = useState<Item[]>([]);
 
   useEffect(() => {
     async function fetchAll() {
-      const [fw, sw, sp, sc, ah, ac, an, al] = await Promise.all([
+      const [fw, sw, sp, sc, ah, at, ag, aw, ab] = await Promise.all([
         supabase.from('weapons').select('id, display_name').eq('item_type_key', 'fists').order('display_name'),
         supabase.from('weapons').select('id, display_name').eq('item_type_key', 'odachi').order('display_name'),
         supabase.from('guardian_spirits').select('id, display_name').order('display_name'),
         supabase.from('soul_cores').select('id, display_name').order('display_name'),
-        supabase.from('armor').select('id, display_name').eq('armor_slot', 'head').order('display_name'),
-        supabase.from('armor').select('id, display_name').eq('armor_slot', 'chest').order('display_name'),
-        supabase.from('armor').select('id, display_name').eq('armor_slot', 'hands').order('display_name'),
-        supabase.from('armor').select('id, display_name').eq('armor_slot', 'legs').order('display_name'),
+        supabase.from('armor').select('id, display_name').eq('armor_slot', 'helmet').order('display_name'),
+        supabase.from('armor').select('id, display_name').eq('armor_slot', 'torso').order('display_name'),
+        supabase.from('armor').select('id, display_name').eq('armor_slot', 'gloves').order('display_name'),
+        supabase.from('armor').select('id, display_name').eq('armor_slot', 'waist').order('display_name'),
+        supabase.from('armor').select('id, display_name').eq('armor_slot', 'boots').order('display_name'),
       ]);
       setFists(fw.data ?? []);
       setOdachi(sw.data ?? []);
       setSpirits(sp.data ?? []);
       setCores(sc.data ?? []);
-      setHead(ah.data ?? []);
-      setChest(ac.data ?? []);
-      setHands(an.data ?? []);
-      setLegs(al.data ?? []);
+      setHelmet(ah.data ?? []);
+      setTorso(at.data ?? []);
+      setGloves(ag.data ?? []);
+      setWaist(aw.data ?? []);
+      setBoots(ab.data ?? []);
     }
     fetchAll();
   }, []);
@@ -96,10 +99,11 @@ export function EquipmentSelector() {
       <div style={{ marginTop: '12px' }}>
         {label('Armor')}
         {([
-          { slot: 'head'  as const, text: 'Head',  items: head  },
-          { slot: 'chest' as const, text: 'Chest', items: chest },
-          { slot: 'hands' as const, text: 'Hands', items: hands },
-          { slot: 'legs'  as const, text: 'Legs',  items: legs  },
+          { slot: 'helmet' as const, text: 'Helmet', items: helmet },
+          { slot: 'torso'  as const, text: 'Torso',  items: torso  },
+          { slot: 'gloves' as const, text: 'Gloves', items: gloves },
+          { slot: 'waist'  as const, text: 'Waist',  items: waist  },
+          { slot: 'boots'  as const, text: 'Boots',  items: boots  },
         ]).map(({ slot, text, items }) => (
           <div key={slot} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
             <span style={{ fontSize: '11px', color: '#6b7280', minWidth: '38px' }}>{text}</span>
